@@ -1,0 +1,18 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<InfoComponent Title="Serverside Version">
+    Razor pages gibi sunucuda çalışır.
+    SignalR bağlantısı sayesinde interaktiftir.
+    Sayfa yüklenme hızı normal bir view gibidir. Ancak her logic sunucuya gidip döndüğü için latencynin yüksek olduğu durumlarda problem yaşanabilir.
+    Sayfadaki logic her kullanıcı için sunucuda tutulur (Logic sunucuda RAM sorunları çıkartır mı bilinmiyor).
+    Tüm logic sunucuda olduğu için frontendde veri bulundurmak zorunluluğu yoktur.
+    Server servisleri (Örnek Logging) direkt olarak kullanılır.
+</InfoComponent>
+
+<a href="/wasm" target="_blank">Wasm Version</a>
