@@ -16,4 +16,10 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.6" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="BaseComponents\" />
+	  <Folder Include="Layouts\" />
+	  <Folder Include="Pages\" />
+	</ItemGroup>
+
 </Project>

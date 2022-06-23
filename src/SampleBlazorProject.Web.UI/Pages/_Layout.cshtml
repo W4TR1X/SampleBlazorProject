@@ -50,7 +50,7 @@
 
         function loadBootResource(type, name, defaultUri, integrity) {
             preLoadCount++;
-            if (type !== 'dotnetjs' /*&& location.hostname !== 'localhost'*/) {
+            if (type !== 'dotnetjs' && location.hostname !== 'localhost') {
                 return (async function () {
                     const response = await fetch(defaultUri + '.br', { cache: 'no-cache' });
                     preLoadFinish++;
