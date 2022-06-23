@@ -15,7 +15,16 @@
 </head>
 
 <body>
-    <div id="app">Loading...</div>
+    <div id="app">
+        <div id="wasm-loader" class="card" style="text-align:center;">
+            <div class="card-header">
+                Wasm files loading
+            </div>
+            <div class="card-body">
+                <div id="progressbar"></div>
+            </div>
+        </div>
+    </div>
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
@@ -25,30 +34,68 @@
 
     <script src="_framework/blazor.webassembly.js" autostart="false"></script>
     <script type="module">
+        var preLoadStart = 0;
+        var preLoadCount = 0;
+        var preLoadError = 0;
+        var preLoadFinish = 0;
+
         import { BrotliDecode } from './decode.min.js';
         Blazor.start({
             loadBootResource: function (type, name, defaultUri, integrity) {
-
-                // for showing downloading file
-                //const doc = document.getElementById("dlls");
-                //doc.innerHTML = `[${name}]`; // ${defaultUri}`;
-
+                preLoadCount++;
                 if (type !== 'dotnetjs' && location.hostname !== 'localhost') {
                     return (async function () {
                         const response = await fetch(defaultUri + '.br', { cache: 'no-cache' });
+                        preLoadFinish++;
                         if (!response.ok) {
+                            preLoadError++;
                             throw new Error(response.statusText);
                         }
+                        console.log(preLoadFinish + "/" + preLoadCount, name);
                         const originalResponseBuffer = await response.arrayBuffer();
                         const originalResponseArray = new Int8Array(originalResponseBuffer);
                         const decompressedResponseArray = BrotliDecode(originalResponseArray);
                         const contentType = type ===
                             'dotnetwasm' ? 'application/wasm' : 'application/octet-stream';
+
+                        var progressbar = document.getElementById("progressbar");
+                        if (progressbar) {
+                            progressbar.style.cssText = "display:inline-block;width:300px;height:10px;;border:solid 1px gray;position:relative;"
+                            progressbar.innerHTML = "<span style='position:absolute;left:0;background-color:darkgreen;height:10px;width:" + (300 * preLoadFinish / preLoadCount) + "px'></span>";
+                        }
+                        if (preLoadFinish == preLoadCount) {
+                            var span = new Date().getTime() - preLoadStart;
+                            console.log("All Done In " + span + " ms , " + preLoadError + " errors");
+                        }
+
                         return new Response(decompressedResponseArray,
                             { headers: { 'content-type': contentType } });
                     })();
                 }
             }
+
+            //                function (type, name, defaultUri, integrity) {
+
+            //    // for showing downloading file
+            //    //const doc = document.getElementById("dlls");
+            //    //doc.innerHTML = `[${name}]`; // ${defaultUri}`;
+
+            //    if (type !== 'dotnetjs' && location.hostname !== 'localhost') {
+            //        return (async function () {
+            //            const response = await fetch(defaultUri + '.br', { cache: 'no-cache' });
+            //            if (!response.ok) {
+            //                throw new Error(response.statusText);
+            //            }
+            //            const originalResponseBuffer = await response.arrayBuffer();
+            //            const originalResponseArray = new Int8Array(originalResponseBuffer);
+            //            const decompressedResponseArray = BrotliDecode(originalResponseArray);
+            //            const contentType = type ===
+            //                'dotnetwasm' ? 'application/wasm' : 'application/octet-stream';
+            //            return new Response(decompressedResponseArray,
+            //                { headers: { 'content-type': contentType } });
+            //        })();
+            //    }
+            //}
         });
     </script>
 
