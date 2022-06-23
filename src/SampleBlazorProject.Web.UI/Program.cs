@@ -7,6 +7,16 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 
+builder.Services.AddCors(options =>
+    options.AddDefaultPolicy(policy =>
+        policy
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .SetIsOriginAllowed(_ => true)
+    )
+);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -21,6 +31,7 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
+app.UseCors();
 
 // for blazor wasm
 app.MapWhen(ctx => ctx.Request.Path.StartsWithSegments("/wasm"), wasm =>
