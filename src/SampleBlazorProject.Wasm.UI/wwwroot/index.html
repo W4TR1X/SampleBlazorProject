@@ -16,12 +16,14 @@
 
 <body>
     <div id="app">
-        <div id="wasm-loader" class="card" style="text-align:center;">
+        <div id="wasm-loader" class="card" style="text-align:center;width: 350px;margin-top: 30px;margin-inline: auto;">
             <div class="card-header">
-                Wasm files loading
+                Yükleniyor...
             </div>
             <div class="card-body">
-                <div id="progressbar"></div>
+                <div id="wasm-boot-progressbar" class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -43,7 +45,7 @@
         Blazor.start({
             loadBootResource: function (type, name, defaultUri, integrity) {
                 preLoadCount++;
-                if (type !== 'dotnetjs' && location.hostname !== 'localhost') {
+                if (type !== 'dotnetjs' /*&& location.hostname !== 'localhost'*/) {
                     return (async function () {
                         const response = await fetch(defaultUri + '.br', { cache: 'no-cache' });
                         preLoadFinish++;
@@ -58,10 +60,9 @@
                         const contentType = type ===
                             'dotnetwasm' ? 'application/wasm' : 'application/octet-stream';
 
-                        var progressbar = document.getElementById("progressbar");
+                        var progressbar = document.getElementById("wasm-boot-progressbar");
                         if (progressbar) {
-                            progressbar.style.cssText = "display:inline-block;width:300px;height:10px;;border:solid 1px gray;position:relative;"
-                            progressbar.innerHTML = "<span style='position:absolute;left:0;background-color:darkgreen;height:10px;width:" + (300 * preLoadFinish / preLoadCount) + "px'></span>";
+                            progressbar.innerHTML = "<div class='progress-bar progress-bar-striped progress-bar-animated' style='width:" + (preLoadFinish / preLoadCount * 100) + "%'></div>";
                         }
                         if (preLoadFinish == preLoadCount) {
                             var span = new Date().getTime() - preLoadStart;
@@ -73,33 +74,17 @@
                     })();
                 }
             }
-
-            //                function (type, name, defaultUri, integrity) {
-
-            //    // for showing downloading file
-            //    //const doc = document.getElementById("dlls");
-            //    //doc.innerHTML = `[${name}]`; // ${defaultUri}`;
-
-            //    if (type !== 'dotnetjs' && location.hostname !== 'localhost') {
-            //        return (async function () {
-            //            const response = await fetch(defaultUri + '.br', { cache: 'no-cache' });
-            //            if (!response.ok) {
-            //                throw new Error(response.statusText);
-            //            }
-            //            const originalResponseBuffer = await response.arrayBuffer();
-            //            const originalResponseArray = new Int8Array(originalResponseBuffer);
-            //            const decompressedResponseArray = BrotliDecode(originalResponseArray);
-            //            const contentType = type ===
-            //                'dotnetwasm' ? 'application/wasm' : 'application/octet-stream';
-            //            return new Response(decompressedResponseArray,
-            //                { headers: { 'content-type': contentType } });
-            //        })();
-            //    }
-            //}
         });
     </script>
-
-    <script>navigator.serviceWorker.register('service-worker.js');</script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/wasm/service-worker.js')
+                .then(function (registration) {
+                    console.log('Service Worker Registered');
+                });
+        } else
+            console.log('Your browser does not support the Service-Worker!');
+    </script>
 </body>
 
 </html>

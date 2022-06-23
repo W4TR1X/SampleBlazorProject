@@ -14,14 +14,18 @@
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
 <body>
-    <div id="wasm-loader" class="card" style="position: fixed;text-align:center;top: 5px;right: 5px;z-index: 999;">
-        <div class="card-header">
-            Wasm files loading
+    <environment include="Staging,Production">
+        <div id="wasm-loader" class="card" style="text-align:center;width: 350px;position: absolute;z-index: 9999;top: 10px;right: 10px;">
+            <div class="card-header">
+                Yükleniyor...
+            </div>
+            <div class="card-body">
+                <div id="wasm-boot-progressbar" class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:0%"></div>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <div id="progressbar"></div>
-        </div>
-    </div>
+    </environment>
 
     @RenderBody()
 
@@ -46,7 +50,7 @@
 
         function loadBootResource(type, name, defaultUri, integrity) {
             preLoadCount++;
-            if (type !== 'dotnetjs' && location.hostname !== 'localhost') {
+            if (type !== 'dotnetjs' /*&& location.hostname !== 'localhost'*/) {
                 return (async function () {
                     const response = await fetch(defaultUri + '.br', { cache: 'no-cache' });
                     preLoadFinish++;
@@ -61,15 +65,14 @@
                     const contentType = type ===
                         'dotnetwasm' ? 'application/wasm' : 'application/octet-stream';
 
-                    var progressbar = document.getElementById("progressbar");
+                    var progressbar = document.getElementById("wasm-boot-progressbar");
                     if (progressbar) {
-                        progressbar.style.cssText = "display:inline-block;width:300px;height:10px;;border:solid 1px gray;position:relative;"
-                        progressbar.innerHTML = "<span style='position:absolute;left:0;background-color:darkgreen;height:10px;width:" + (300 * preLoadFinish / preLoadCount) + "px'></span>";
+                        progressbar.innerHTML = "<div class='progress-bar progress-bar-striped progress-bar-animated' style='width:" + (preLoadFinish / preLoadCount * 100) + "%'></div>";
                     }
                     if (preLoadFinish == preLoadCount) {
                         var span = new Date().getTime() - preLoadStart;
                         console.log("All Done In " + span + " ms , " + preLoadError + " errors");
-                        document.getElementById("wasm-loader").innerHTML = "";
+                        document.getElementById("wasm-loader").outerHTML = "";
                     }
 
                     return new Response(decompressedResponseArray,
